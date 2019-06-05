@@ -4,26 +4,55 @@
  * SPDX-License-Identifier: LicenseRef-BSD-5-Clause-Nordic
  */
 
+#include <dk_buttons_and_leds.h>
 #include <zephyr.h>
 #include <stdio.h>
 #include <uart.h>
 #include <string.h>
 
-/**@brief Recoverable BSD library error. */
-void bsd_recoverable_error_handler(uint32_t err)
+// /**@brief Recoverable BSD library error. */
+// void bsd_recoverable_error_handler(uint32_t err)
+// {
+// 	printk("bsdlib recoverable error: %u\n", err);
+// }
+
+// /**@brief Irrecoverable BSD library error. */
+// void bsd_irrecoverable_error_handler(uint32_t err)
+// {
+// 	printk("bsdlib irrecoverable error: %u\n", err);
+
+// 	__ASSERT_NO_MSG(false);
+// }
+
+static void buttons_leds_init(void)
 {
-	printk("bsdlib recoverable error: %u\n", err);
+	#if defined(CONFIG_DK_LIBRARY)
+		int err;
+
+		err = dk_leds_init();
+		if (err) {
+			printk("Could not initialize leds, err code: %d\n", err);
+		}
+
+		err = dk_set_leds_state(0x00, DK_ALL_LEDS_MSK);
+		if (err) {
+			printk("Could not set leds state, err code: %d\n", err);
+		}
+	#endif
 }
 
-/**@brief Irrecoverable BSD library error. */
-void bsd_irrecoverable_error_handler(uint32_t err)
+static void gps_init(void)
 {
-	printk("bsdlib irrecoverable error: %u\n", err);
 
-	__ASSERT_NO_MSG(false);
+}
+
+static void gps_data_pull(void)
+{
+	
 }
 
 void main(void)
 {
-	printk("The AT host sample started\n");
+	printk("The application has started\n");
+	buttons_leds_init();
 }
