@@ -6,11 +6,8 @@
 
 #include <zephyr.h>
 #include <misc/printk.h>
-#include <misc/util.h>
-#include <linker/linker-defs.h>
 #include <device.h>
 #include <gpio.h>
-#include "spm_internal.h"
 
 #if !defined(CONFIG_ARM_SECURE_FIRMWARE)
 #error "Module requires compiling for Secure ARM Firmware"
@@ -29,11 +26,13 @@
 #define NON_SECURE_APP_ADDRESS DT_FLASH_AREA_IMAGE_0_NONSECURE_OFFSET_0
 #endif /* USE_PARTITION_MANAGER */
 
-#define FIRST_NONSECURE_ADDRESS (NON_SECURE_APP_ADDRESS)
+/* Size of secure attribution configurable flash region */
+#define FLASH_SECURE_ATTRIBUTION_REGION_SIZE (32*1024)
+#define LAST_SECURE_ADDRESS (NON_SECURE_APP_ADDRESS - 1)
+#define LAST_SECURE_REGION \
+	(LAST_SECURE_ADDRESS / FLASH_SECURE_ATTRIBUTION_REGION_SIZE)
 #define LAST_SECURE_REGION_INDEX \
-	((FIRST_NONSECURE_ADDRESS / FLASH_SECURE_ATTRIBUTION_REGION_SIZE) - 1)
-
-BUILD_ASSERT_MSG(LAST_SECURE_REGION_INDEX != -1, "SPM is too small.");
+	(LAST_SECURE_REGION > 0 ? (LAST_SECURE_REGION - 1) : 0)
 
 /*
  *  * The security configuration for depends on where the non secure app
@@ -104,37 +103,80 @@ extern int irq_target_state_is_secure(unsigned int irq);
 	}
 #endif
 
-#if defined(CONFIG_ARM_FIRMWARE_HAS_SECURE_ENTRY_FUNCS)
 
-static void spm_config_nsc_flash(void)
-{
-	/* Configure a single region in Secure Flash as Non-Secure Callable
-	 * (NSC) area.
-	 *
-	 * Area to configure is dynamically decided with help from linker code.
-	 *
-	 * Note: Any Secure Entry functions, exposing secure services to the
-	 * Non-Secure firmware, shall be located inside this NSC area.
-	 *
-	 * If the start address of the NSC area is hard-coded, it must follow
-	 * the HW restrictions: The size must be a power of 2 between 32 and
-	 * 4096, and the end address must fall on a SPU region boundary.
-	 */
-	u32_t nsc_size = FLASH_NSC_SIZE_FROM_ADDR(__sg_start);
+#define FLASH_EXEC                                                             \
+	((SPU_FLASHREGION_PERM_EXECUTE_Enable                                  \
+	  << SPU_FLASHREGION_PERM_EXECUTE_Pos) &                               \
+	 SPU_FLASHREGION_PERM_EXECUTE_Msk)
 
-	__ASSERT((u32_t)__sg_size <= nsc_size,
-		"The Non-Secure Callable region is overflowed by %d byte(s).\n",
-		(u32_t)__sg_size - nsc_size);
+#define FLASH_WRITE                                                            \
+	((SPU_FLASHREGION_PERM_WRITE_Enable                                    \
+	  << SPU_FLASHREGION_PERM_WRITE_Pos) &                                 \
+	 SPU_FLASHREGION_PERM_WRITE_Msk)
 
-	NRF_SPU->FLASHNSC[0].REGION = FLASH_NSC_REGION_FROM_ADDR(__sg_start);
-	NRF_SPU->FLASHNSC[0].SIZE = FLASH_NSC_SIZE_REG(nsc_size);
+#define FLASH_READ                                                             \
+	((SPU_FLASHREGION_PERM_READ_Enable << SPU_FLASHREGION_PERM_READ_Pos) & \
+	 SPU_FLASHREGION_PERM_READ_Msk)
 
-	PRINT("Non-secure callable region 0 placed in flash region %d with size %d.\n",
-		NRF_SPU->FLASHNSC[0].REGION, NRF_SPU->FLASHNSC[0].SIZE << 5);
-	PRINT("\n");
-}
-#endif /* CONFIG_ARM_FIRMWARE_HAS_SECURE_ENTRY_FUNCS */
+#define FLASH_LOCK                                                             \
+	((SPU_FLASHREGION_PERM_LOCK_Locked << SPU_FLASHREGION_PERM_LOCK_Pos) & \
+	 SPU_FLASHREGION_PERM_LOCK_Msk)
 
+#define FLASH_SECURE                                                           \
+	((SPU_FLASHREGION_PERM_SECATTR_Secure                                  \
+	  << SPU_FLASHREGION_PERM_SECATTR_Pos) &                               \
+	 SPU_FLASHREGION_PERM_SECATTR_Msk)
+
+#define FLASH_NONSEC                                                           \
+	((SPU_FLASHREGION_PERM_SECATTR_Non_Secure                              \
+	  << SPU_FLASHREGION_PERM_SECATTR_Pos) &                               \
+	 SPU_FLASHREGION_PERM_SECATTR_Msk)
+
+#define SRAM_EXEC                                                              \
+	((SPU_RAMREGION_PERM_EXECUTE_Enable                                    \
+	  << SPU_RAMREGION_PERM_EXECUTE_Pos) &                                 \
+	 SPU_RAMREGION_PERM_EXECUTE_Msk)
+
+#define SRAM_WRITE                                                             \
+	((SPU_RAMREGION_PERM_WRITE_Enable << SPU_RAMREGION_PERM_WRITE_Pos) &   \
+	 SPU_RAMREGION_PERM_WRITE_Msk)
+
+#define SRAM_READ                                                              \
+	((SPU_RAMREGION_PERM_READ_Enable << SPU_RAMREGION_PERM_READ_Pos) &     \
+	 SPU_RAMREGION_PERM_READ_Msk)
+
+#define SRAM_LOCK                                                              \
+	((SPU_RAMREGION_PERM_LOCK_Locked << SPU_RAMREGION_PERM_LOCK_Pos) &     \
+	 SPU_RAMREGION_PERM_LOCK_Msk)
+
+#define SRAM_SECURE                                                            \
+	((SPU_RAMREGION_PERM_SECATTR_Secure                                    \
+	  << SPU_RAMREGION_PERM_SECATTR_Pos) &                                 \
+	 SPU_RAMREGION_PERM_SECATTR_Msk)
+
+#define SRAM_NONSEC                                                            \
+	((SPU_RAMREGION_PERM_SECATTR_Non_Secure                                \
+	  << SPU_RAMREGION_PERM_SECATTR_Pos) &                                 \
+	 SPU_RAMREGION_PERM_SECATTR_Msk)
+
+#define PERIPH_PRESENT                                                         \
+	((SPU_PERIPHID_PERM_PRESENT_IsPresent                                  \
+	  << SPU_PERIPHID_PERM_PRESENT_Pos) &                                  \
+	 SPU_PERIPHID_PERM_PRESENT_Msk)
+
+#define PERIPH_NONSEC                                                          \
+	((SPU_PERIPHID_PERM_SECATTR_NonSecure                                  \
+	  << SPU_PERIPHID_PERM_SECATTR_Pos) &                                  \
+	 SPU_PERIPHID_PERM_SECATTR_Msk)
+
+#define PERIPH_DMA_NOSEP                                                       \
+	((SPU_PERIPHID_PERM_DMA_NoSeparateAttribute                            \
+	  << SPU_PERIPHID_PERM_DMA_Pos) &                                      \
+	 SPU_PERIPHID_PERM_DMA_Msk)
+
+#define PERIPH_LOCK                                                            \
+	((SPU_PERIPHID_PERM_LOCK_Locked << SPU_PERIPHID_PERM_LOCK_Pos) &       \
+	 SPU_PERIPHID_PERM_LOCK_Msk)
 
 static void spm_config_flash(void)
 {
@@ -169,19 +211,6 @@ static void spm_config_flash(void)
 		PRINT("%c", flash_perm[i] & FLASH_LOCK  ? 'l' : '-');
 		PRINT("\n");
 	}
-
-#if defined(CONFIG_ARM_FIRMWARE_HAS_SECURE_ENTRY_FUNCS)
-	spm_config_nsc_flash();
-
-#if defined(CONFIG_SECURE_SERVICES)
-	int err = spm_secure_services_init();
-
-	if (err != 0) {
-		PRINT("Could not initialize secure services (err %d).\n", err);
-	}
-#endif
-#endif /* CONFIG_ARM_FIRMWARE_HAS_SECURE_ENTRY_FUNCS */
-
 	PRINT("\n");
 }
 
@@ -354,8 +383,8 @@ static void spm_configure_ns(const tz_nonsecure_setup_conf_t
 	tz_nonsecure_exception_prio_config(1);
 	/* Set non-banked exceptions to target Non-Secure */
 	tz_nbanked_exception_target_state_set(0);
-	/* Don't allow Non-Secure firmware to issue System resets. */
-	tz_nonsecure_system_reset_req_block(1);
+	/* Allow Non-Secure firmware to issue System resets. */
+	tz_nonsecure_system_reset_req_block(0);
 	/* Allow SPU to have precedence over (non-existing) ARMv8-M SAU. */
 	tz_sau_configure(0, 1);
 

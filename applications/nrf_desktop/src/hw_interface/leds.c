@@ -231,14 +231,6 @@ static bool event_handler(const struct event_header *eh)
 	}
 
 	if (is_power_down_event(eh)) {
-		const struct power_down_event *event =
-			cast_power_down_event(eh);
-
-		/* Leds should keep working on system error. */
-		if (event->error) {
-			return false;
-		}
-
 		if (initialized) {
 			leds_stop();
 			initialized = false;
