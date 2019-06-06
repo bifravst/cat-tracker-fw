@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "measurement_event.h"
 
 static int log_measurement_event(const struct event_header *eh, char *buf, size_t buf_len) {
