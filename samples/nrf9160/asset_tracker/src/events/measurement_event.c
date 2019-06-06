@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include "measurement_event.h"
 
-static int log_measurement_event(const struct event_header *eh, char *buf, size_t buf_len) {
+static int log_measurement_event(const struct event_header *eh, char *buf, size_t buf_len) {    //module which logs gps data
     struct measurement_event *event = cast_measurement_event(eh);
-    return snprintf(buf, buf_len, "val1=%d val2=%d val3=%d", event->value1, event->value2, event->value3);
+    return snprintf(buf, buf_len, "val1=%d", event->value1);
 }
 
 

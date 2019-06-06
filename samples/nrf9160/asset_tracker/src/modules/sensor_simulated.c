@@ -9,10 +9,19 @@ static bool event_handler(const struct event_header *eh)    //function is called
 		struct measurement_event *event = cast_measurement_event(eh);
 
 		s8_t v1 = event->value1;
-		s16_t v2 = event->value2;
-		s32_t v3 = event->value3;
+		// s16_t v2 = event->value2;
+		// s32_t v3 = event->value3;
 
-		printk("did the values pass through? %d, %d, %d", v1, v2, v3);
+        // switch (v1) { //eh->type
+        //     case GPS_DATA_READY:
+        //         printk("GPS_DATA_READY EVENT triggered");
+        //         break;
+        //     default:
+        //         printk("RECIEVED UNKNOWN EVENT");
+        //         break;
+        // }
+
+		printk("Value to be passed to cloud %d", v1);
 
         //Execute some action here
 

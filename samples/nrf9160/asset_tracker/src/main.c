@@ -33,20 +33,20 @@ static void buttons_leds_init(void)
 	#endif
 }
 
+static void generate_event(void) {
+	struct measurement_event *event = new_measurement_event();
+
+	event->value1 = 1; //this value should be replace by actual GPS data
+
+	EVENT_SUBMIT(event);
+}
+
 void main(void)
 {
 	printk("The application has started\n");
 	buttons_leds_init();
 	//gps_init();
-	if (event_manager_init()) {
-		LOG_ERR("Event manager not initialized");
-	} else {
-		struct measurement_event *event = new_measurement_event();
-
-		event->value1 = 1;
-		event->value2 = 2;
-		event->value3 = 3;
-
-		EVENT_SUBMIT(event);
-	}
+	event_manager_init();
+	generate_event();
+	
 }
