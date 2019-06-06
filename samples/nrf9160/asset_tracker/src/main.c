@@ -10,6 +10,12 @@
 #include <uart.h>
 #include <string.h>
 
+#include <event_manager.h>
+#include <logging/log.h>
+#include <measurement_event.h>
+
+LOG_MODULE_REGISTER(MODULE);
+
 static void buttons_leds_init(void)
 {
 	#if defined(CONFIG_DK_LIBRARY)
@@ -32,4 +38,15 @@ void main(void)
 	printk("The application has started\n");
 	buttons_leds_init();
 	//gps_init();
+	if (event_manager_init()) {
+		LOG_ERR("Event manager not initialized");
+	} else {
+		struct measurement_event *event = new_measurement_event();
+
+		event->value1 = 1;
+		event->value2 = 2;
+		event->value3 = 3;
+
+		EVENT_SUBMIT(event);
+	}
 }
