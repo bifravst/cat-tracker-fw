@@ -35,15 +35,15 @@ jobs:
       - run:
           name: GCC ARM Embed
           command: |
-            if [ ! -d ~/gcc-arm-none-eabi-7-2018-q2-update ]; then
-                wget 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2?revision=bc2c96c0-14b5-4bb4-9f18-bceb4050fee7?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,7-2018-q2-update' -O ~/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2;
-                tar xjf ~/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2;
+            if [ ! -d ~/ncs/gcc-arm-none-eabi-7-2018-q2-update ]; then
+                wget 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2?revision=bc2c96c0-14b5-4bb4-9f18-bceb4050fee7?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,7-2018-q2-update' -O ~/ncs/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2;
+                tar xjf ~/ncs/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2;
             fi
             echo 'export ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb' >> $BASH_ENV
-            echo 'export GNUARMEMB_TOOLCHAIN_PATH="~/gcc-arm-none-eabi-7-2018-q2-update"' >> $BASH_ENV
+            echo 'export GNUARMEMB_TOOLCHAIN_PATH="~/ncs/gcc-arm-none-eabi-7-2018-q2-update"' >> $BASH_ENV
       - save_cache:
           paths:
-            - ~/gcc-arm-none-eabi-7-2018-q2-update
+            - ~/ncs/gcc-arm-none-eabi-7-2018-q2-update
           key: gcc-arm-none-eabi-7-2018-q2-update
 
       - restore_cache:
@@ -68,6 +68,19 @@ jobs:
             pip3 install --user -r nrf/scripts/requirements.txt
             pip3 install --user -r mcuboot/scripts/requirements.txt
 
+      - save_cache:
+          paths:
+            - ~/ncs/zephyr
+            - ~/ncs/modules
+            - ~/ncs/mcuboot
+            - ~/ncs/nrfxlib
+            - ~/ncs/test
+            - ~/ncs/mbedtls
+            - ~/.cache/pip
+            - ~/.local/lib/python3.7/site-packages
+            - ~/.local/bin
+          key: deps-{{ checksum "west.yml" }}
+
       - run:
           name: Build
           command: |
@@ -81,19 +94,6 @@ jobs:
           command: |
             npm i --no-save semantic-release;
             npx semantic-release || true
-
-      - save_cache:
-          paths:
-            - ~/ncs/zephyr
-            - ~/ncs/modules
-            - ~/ncs/mcuboot
-            - ~/ncs/nrfxlib
-            - ~/ncs/test
-            - ~/ncs/mbedtls
-            - ~/.cache/pip
-            - ~/.local/lib/python3.7/site-packages
-            - ~/.local/bin
-          key: deps-{{ checksum "west.yml" }}
 
 workflows:
   version: 2
