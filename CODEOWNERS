@@ -69,3 +69,5 @@ subsys/debug/CMakeLists.txt               @nordic-krch
 /tests/                                   @rakons
 /zephyr/                                  @carlescufi
 
+# CI
+/.circleci/                               @coderbyheart
