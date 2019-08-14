@@ -1,0 +1,86 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:lts
+        user: root
+    working_directory: /root/ncs
+    steps:
+      - checkout
+
+      - run:
+          name: Set up GitHub credentials
+          command: echo "machine github.com login ${GH_USERNAME} password ${GH_TOKEN}" > ~/.netrc
+
+      - run:
+          name: Install latest npm
+          command: sudo npm install -g npm@
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "west.yml" }}
+            # fallback to using the latest cache if no exact match is found
+            - deps-
+
+      - run:
+          name: Install system dependencies
+          command: |
+            apt-get -y install ninja-build gperf
+            wget -nc 'http://mirrors.kernel.org/ubuntu/pool/main/d/device-tree-compiler/device-tree-compiler_1.4.7-1_amd64.deb' -O /root/device-tree-compiler_1.4.7-1_amd64.deb || true
+            dpkg -i /root/device-tree-compiler_1.4.7-1_amd64.deb
+            export PATH=$PATH:/root/.local/bin
+            pip3 install --user west
+            pip3 install --user cmake
+
+      - run:
+          name: Install Zephyr dependencies
+          command: |
+            |
+              if [ ! -d /root/ncs/gcc-arm-none-eabi-7-2018-q2-update ]; then
+                  wget 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2?revision=bc2c96c0-14b5-4bb4-9f18-bceb4050fee7?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,7-2018-q2-update' -O /root/ncs/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2;
+                  tar xjf /root/ncs/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2;
+              fi
+            west init -m $CIRCLE_REPOSITORY_URL
+            west update
+            pip3 install --user -r zephyr/scripts/requirements.txt
+            pip3 install --user -r nrf/scripts/requirements.txt
+            pip3 install --user -r mcuboot/scripts/requirements.txt
+            export ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb
+            export GNUARMEMB_TOOLCHAIN_PATH="/root/ncs/gcc-arm-none-eabi-7-2018-q2-update"
+
+      - run:
+          name: Build
+          command: |
+            cd /root/ncs/nrf/applications/cat_tracker
+            west build -b nrf9160_pca20035ns
+            sha256sum /root/ncs/nrf/applications/cat_tracker/build/zephyr/merged.hex
+
+      - run:
+          when: on_success
+          name: Run semantic relase
+          command: |
+            npm i --no-save semantic-release;
+            npx semantic-release || true
+
+      - save_cache:
+          paths:
+            - /root/ncs/zephyr
+            - /root/ncs/modules
+            - /root/ncs/mcuboot
+            - /root/ncs/nrfxlib
+            - /root/ncs/test
+            - /root/ncs/mbedtls
+            - /root/.cache/pip
+            - /root/.local/lib/python3.7/site-packages
+            - /root/.local/bin
+            - /root/ncs/gcc-arm-none-eabi-7-2018-q2-update
+            - /root/device-tree-compiler_1.4.7-1_amd64.deb
+          key: deps-{{ checksum "west.yml" }}
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          context: bifravst
