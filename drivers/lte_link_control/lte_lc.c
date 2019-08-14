@@ -35,6 +35,7 @@ static const char edrx_disable[] = "AT+CEDRXS=3";
 /* Request modem to go to power saving mode */
 static const char psm_req[] = "AT+CPSMS=1,,,\""CONFIG_LTE_PSM_REQ_RPTAU
 			      "\",\""CONFIG_LTE_PSM_REQ_RAT"\"";
+
 /* Request PSM to be disabled */
 static const char psm_disable[] = "AT+CPSMS=";
 /* Set the modem to power off mode */

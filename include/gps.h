@@ -20,8 +20,8 @@ extern "C" {
 #include <errno.h>
 #include <zephyr/types.h>
 
-#define GPS_NMEA_SENTENCE_MAX_LENGTH 83
-#define GPS_MAX_SATELLITES 12
+#define GPS_NMEA_SENTENCE_MAX_LENGTH	83
+#define GPS_MAX_SATELLITES		12
 
 enum gps_channel {
 	GPS_CHAN_NMEA, /** Channel to receive NMEA strings. */
@@ -46,10 +46,10 @@ struct gps_datetime {
 struct gps_sv {
 	u16_t sv;
 	u16_t cn0;
-	s16_t elevation;
-	s16_t azimuth;
-	u8_t flags;
-	u8_t signal;
+	s16_t  elevation;
+	s16_t  azimuth;
+	u8_t  flags;
+	u8_t  signal;
 };
 
 struct gps_pvt {
