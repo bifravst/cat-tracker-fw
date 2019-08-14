@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Install system dependencies
           command: |
-            apt-get -y install ninja-build gperf
+            apt-get -y install ninja-build gperf python3-pip
             wget -nc 'http://mirrors.kernel.org/ubuntu/pool/main/d/device-tree-compiler/device-tree-compiler_1.4.7-1_amd64.deb' -O /root/device-tree-compiler_1.4.7-1_amd64.deb || true
             dpkg -i /root/device-tree-compiler_1.4.7-1_amd64.deb
             export PATH=$PATH:/root/.local/bin
