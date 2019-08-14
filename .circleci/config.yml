@@ -12,10 +12,6 @@ jobs:
           name: Set up GitHub credentials
           command: echo "machine github.com login ${GH_USERNAME} password ${GH_TOKEN}" > ~/.netrc
 
-      - run:
-          name: Install latest npm
-          command: sudo npm install -g npm@
-
       # Download and cache dependencies
       - restore_cache:
           keys:
