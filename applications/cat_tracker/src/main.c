@@ -1,9 +1,9 @@
 #include <zephyr.h>
-#include <log_ctrl.h>
 #include <stdio.h>
 #include <uart.h>
 #include <string.h>
 #include <logging/log.h>
+#include <logging/log_ctrl.h>
 #include <misc/reboot.h>
 #include <mqtt_behaviour.h>
 #include <modem_data.h>
@@ -145,7 +145,6 @@ static void adxl362_trigger_handler(struct device *dev,
 					  sensor_value_to_double(&accel[1]),
 					  sensor_value_to_double(&accel[2]),
 					  get_current_time());
-
 			printf("x: %.1f, y: %.1f, z: %.1f (m/s^2)\n",
 			       sensor_value_to_double(&accel[0]),
 			       sensor_value_to_double(&accel[1]),
@@ -222,9 +221,9 @@ static void start_restart_mov_timer(void)
 void main(void)
 {
 	printk("The cat tracker has started\n");
-	adxl362_init();
 	cloud_configuration_init();
 	lte_connect();
+	adxl362_init();
 	gps_control_init(gps_control_handler);
 	cloud_publish(NO_GPS_FIX, SYNCRONIZATION, INCLUDE_MOD_D);
 	start_restart_mov_timer();
