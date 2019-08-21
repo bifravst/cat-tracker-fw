@@ -24,13 +24,11 @@ jobs:
 
       - name: Install Zephyr dependencies
         run: |
-            sudo apt-get -y install ninja-build gperf python3-pip python3-setuptools git
+            sudo apt-get -y install ninja-build gperf python3-pip python3-setuptools
             pip3 install --user cmake
             pip3 install --user west
 
       - name: West init
-        env:
-          PATH: ~/.local/bin:${PATH}
         run: |
           west init -m https://github.com/${GITHUB_REPOSITORY} --mr ${GITHUB_SHA}
           west update
