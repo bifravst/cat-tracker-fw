@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Zephyr dependencies
         run: |
-            sudo apt-get -y install ninja-build gperf python3-pip python3-setuptools
+            sudo apt-get -y install ninja-build gperf python3-pip python3-setuptools git
             pip3 install --user cmake
             pip3 install --user west
 
