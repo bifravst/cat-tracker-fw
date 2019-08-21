@@ -24,13 +24,13 @@ jobs:
 
       - name: Install Zephyr dependencies
         run: |
-            export PATH=~/.local/bin:$PATH
-            sudo apt-get -y install ninja-build gperf python3-pip python3-setuptools
-            pip3 install --user cmake
-            pip3 install --user west
+          sudo apt-get -y install ninja-build gperf python3-pip python3-setuptools
+          pip3 install --user cmake
+          pip3 install --user west
 
       - name: West init
         run: |
+          export PATH=~/.local/bin:$PATH
           west init -m https://github.com/${GITHUB_REPOSITORY} --mr ${GITHUB_SHA}
           west update
           pip3 install --user -r zephyr/scripts/requirements.txt
