@@ -44,8 +44,8 @@ jobs:
         env:
           ZEPHYR_TOOLCHAIN_VARIANT: gnuarmemb
           GNUARMEMB_TOOLCHAIN_PATH: ${GITHUB_WORKSPACE}/gcc-arm-none-eabi-7-2018-q2-update
-          PATH: ~/.local/bin:${PATH}
         run: |
+          export PATH=~/.local/bin:$PATH
           cd ${GITHUB_WORKSPACE}/ncs/nrf/applications/cat_tracker
           west build -p auto -b nrf9160_pca20035ns
           mv ${GITHUB_WORKSPACE}/ncs/nrf/applications/cat_tracker/build/zephyr/merged.hex ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca20035ns.hex
