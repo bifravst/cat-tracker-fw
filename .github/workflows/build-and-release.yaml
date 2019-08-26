@@ -34,8 +34,15 @@ jobs:
           west update
           pip3 install --user -r zephyr/scripts/requirements.txt
           pip3 install --user -r nrf/scripts/requirements.txt
-          cat mcuboot/scripts/requirements.txt
+          pip3 install --user asn1crypto
+          pip3 install --user six
+          pip3 install --user pycparser
+          pip3 install --user cffi
+          pip3 install --user cryptography
+          pip3 install --user intelhex
+          pip3 install --user click
           pip3 install --user -r mcuboot/scripts/requirements.txt
+
 
       - name: Patch West to enable nrf9160_pca10015ns
         run: patch -b ${GITHUB_WORKSPACE}/ncs/zephyr/cmake/app/boilerplate.cmake < ${GITHUB_WORKSPACE}/ncs/nrf/.github/workflows/zephyr.patch
