@@ -34,6 +34,7 @@ jobs:
           west update
           pip3 install --user -r zephyr/scripts/requirements.txt
           pip3 install --user -r nrf/scripts/requirements.txt
+          cat mcuboot/scripts/requirements.txt
           pip3 install --user -r mcuboot/scripts/requirements.txt
 
       - name: Patch West to enable nrf9160_pca10015ns
