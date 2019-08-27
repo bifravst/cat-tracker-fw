@@ -35,7 +35,7 @@ jobs:
           pip3 install --user -r zephyr/scripts/requirements.txt
           pip3 install --user -r nrf/scripts/requirements.txt
           # Remove system provided python cryptography module so the next step does not crash
-          apt-get remove python-cryptography python3-cryptography
+          sudo apt-get -y remove python-cryptography python3-cryptography
           pip3 install --user -r mcuboot/scripts/requirements.txt
 
       - name: Patch West to enable nrf9160_pca10015ns
