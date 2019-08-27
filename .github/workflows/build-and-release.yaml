@@ -39,10 +39,9 @@ jobs:
         run: patch -b ${GITHUB_WORKSPACE}/zephyr/cmake/app/boilerplate.cmake < ${GITHUB_WORKSPACE}/nrf/.github/workflows/zephyr.patch
 
       - name: Build
-        env:
-          ZEPHYR_TOOLCHAIN_VARIANT: gnuarmemb
-          GNUARMEMB_TOOLCHAIN_PATH: ${GITHUB_WORKSPACE}/gcc-arm-none-eabi-7-2018-q2-update
         run: |
+          export ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb
+          export GNUARMEMB_TOOLCHAIN_PATH=${GITHUB_WORKSPACE}/gcc-arm-none-eabi-7-2018-q2-update
           export PATH=~/.local/bin:$PATH
           cd ${GITHUB_WORKSPACE}/nrf/applications/cat_tracker
           west build -p auto -b nrf9160_pca20035ns
