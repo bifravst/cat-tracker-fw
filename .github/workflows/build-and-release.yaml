@@ -36,7 +36,7 @@ jobs:
           pip3 install --user -r mcuboot/scripts/requirements.txt
 
       - name: Patch West to enable nrf9160_pca10015ns
-        run: patch -b ${GITHUB_WORKSPACE}/ncs/zephyr/cmake/app/boilerplate.cmake < ${GITHUB_WORKSPACE}/nrf/.github/workflows/zephyr.patch
+        run: patch -b ${GITHUB_WORKSPACE}/zephyr/cmake/app/boilerplate.cmake < ${GITHUB_WORKSPACE}/nrf/.github/workflows/zephyr.patch
 
       - name: Build
         env:
