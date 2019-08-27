@@ -37,8 +37,8 @@ jobs:
           pip3 install --user asn1crypto
           pip3 install --user six
           pip3 install --user pycparser
-          pip3 install --user cffi
           pip3 install --user cryptography
+          pip3 install --user cffi
           pip3 install --user intelhex
           pip3 install --user click
           pip3 install --user -r mcuboot/scripts/requirements.txt
