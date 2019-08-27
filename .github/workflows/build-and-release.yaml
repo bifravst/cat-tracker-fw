@@ -39,7 +39,7 @@ jobs:
           pip3 install --user -r mcuboot/scripts/requirements.txt
 
       - name: Patch West to enable nrf9160_pca10015ns
-        run: patch -b ${GITHUB_WORKSPACE}/ncs/zephyr/cmake/app/boilerplate.cmake < ${GITHUB_WORKSPACE}/ncs/nrf/.github/workflows/zephyr.patch
+        run: patch -b ${GITHUB_WORKSPACE}/ncs/zephyr/cmake/app/boilerplate.cmake < ${GITHUB_WORKSPACE}/nrf/.github/workflows/zephyr.patch
 
       - name: Build
         env:
@@ -47,15 +47,15 @@ jobs:
           GNUARMEMB_TOOLCHAIN_PATH: ${GITHUB_WORKSPACE}/gcc-arm-none-eabi-7-2018-q2-update
         run: |
           export PATH=~/.local/bin:$PATH
-          cd ${GITHUB_WORKSPACE}/ncs/nrf/applications/cat_tracker
+          cd ${GITHUB_WORKSPACE}/nrf/applications/cat_tracker
           west build -p auto -b nrf9160_pca20035ns
-          mv ${GITHUB_WORKSPACE}/ncs/nrf/applications/cat_tracker/build/zephyr/merged.hex ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca20035ns.hex
+          mv ${GITHUB_WORKSPACE}/nrf/applications/cat_tracker/build/zephyr/merged.hex ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca20035ns.hex
           sha256sum ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca20035ns.hex
           west build -p auto -b nrf9160_pca10090ns
-          mv ${GITHUB_WORKSPACE}/ncs/nrf/applications/cat_tracker/build/zephyr/merged.hex ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca10090ns.hex
+          mv ${GITHUB_WORKSPACE}/nrf/applications/cat_tracker/build/zephyr/merged.hex ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca10090ns.hex
           sha256sum ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca10090ns.hex
           west build -p auto -b nrf9160_pca10015ns
-          mv ${GITHUB_WORKSPACE}/ncs/nrf/applications/cat_tracker/build/zephyr/merged.hex ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca10015ns.hex
+          mv ${GITHUB_WORKSPACE}/nrf/applications/cat_tracker/build/zephyr/merged.hex ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca10015ns.hex
           sha256sum ${GITHUB_WORKSPACE}/ncs/cat-tracker-nrf9160_pca10015ns.hex
 
       - name: Semantic release
