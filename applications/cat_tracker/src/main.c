@@ -12,6 +12,7 @@
 #include <gps_controller.h>
 #include <mqtt_codec.h>
 #include <leds.h>
+#include "./version.h"
 
 #define NORMAL_OPERATION false
 #define SYNCRONIZATION true
@@ -276,6 +277,7 @@ static void lte_connect()
 void main(void)
 {
 	printk("The cat tracker has started\n");
+	printk("Version: %s\n", DEVICE_APP_VERSION);
 	work_init();
 	adxl362_init();
 	cloud_configuration_init();
